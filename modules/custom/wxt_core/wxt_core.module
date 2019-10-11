@@ -8,6 +8,28 @@
 use Drupal\Core\Database\Query\AlterableInterface;
 
 /**
+ * Implements hook_requirements().
+ */
+function wxt_core_requirements($phase) {
+  $requirements = [];
+
+  if ($phase === 'install') {
+    $info = Drupal::service('extension.list.profile')
+      ->get('wxt')
+      ->getPathname();
+
+    if (strstr(file_get_contents($info), '# Information added by Drupal.org packaging script')) {
+      $requirements['wxt_reject_tarball'] = [
+        'title' => t('Missing Composer dependencies'),
+        'severity' => REQUIREMENT_ERROR,
+        'description' => t('WxT appears to have been downloaded as an archive from drupal.org. WxT cannot be installed this way because drupal.org does not package all the necessary dependencies. Please visit <a href="https://github.com/drupalwxt/wxt-project">this GitHub repository</a> for instructions on how to build Lightning using Composer.'),
+      ];
+    }
+  }
+  return $requirements;
+}
+
+/**
  * Toggles the state of a specified menu link.
  */
 function wxt_core_menu_state_toggle($menu_id, $enabled = TRUE) {
